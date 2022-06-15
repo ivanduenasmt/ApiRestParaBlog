@@ -1,10 +1,15 @@
 package com.ivanDuenias.ApiRest.servicio;
 
 import com.ivanDuenias.ApiRest.dto.PublicacionDTO;
+import com.ivanDuenias.ApiRest.dto.PublicacionRespuesta;
 import com.ivanDuenias.ApiRest.entidad.Publicacion;
 import com.ivanDuenias.ApiRest.excepcion.ResourceNotFoundException;
 import com.ivanDuenias.ApiRest.repositorio.PublicacionRepositorio;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,9 +32,25 @@ public class PublicacionServicioImpl implements PublicacionServicio{
     }
 
     @Override
-    public List<PublicacionDTO> obtenerTodasPublicaciones() {
-        List<Publicacion> publicaciones = publicacionRepositorio.findAll();
-        return publicaciones.stream().map(publicacion -> convertirADTO(publicacion)).collect(Collectors.toList());
+    public PublicacionRespuesta obtenerTodasPublicaciones(int numeroPagina, int medidaPagina, String ordenarPor, String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())?Sort.by(ordenarPor).ascending():Sort.by(ordenarPor).descending();
+
+        Pageable pageable = PageRequest.of(numeroPagina, medidaPagina, sort);
+
+        Page<Publicacion> publicacions = publicacionRepositorio.findAll(pageable);
+
+        List<Publicacion> publicaciones = publicacions.getContent();
+        List<PublicacionDTO> contenido = publicaciones.stream().map(publicacion -> convertirADTO(publicacion)).collect(Collectors.toList());
+
+        PublicacionRespuesta respuesta = new PublicacionRespuesta();
+        respuesta.setContenido(contenido);
+        respuesta.setNumeroPagina(publicacions.getNumber());
+        respuesta.setMedidaPagina(publicacions.getSize());
+        respuesta.setTotalElementos(publicacions.getTotalElements());
+        respuesta.setTotalPaginas(publicacions.getTotalPages());
+        respuesta.setUltima(publicacions.isLast());
+
+        return respuesta;
     }
 
     @Override
