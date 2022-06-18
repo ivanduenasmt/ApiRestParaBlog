@@ -1,12 +1,14 @@
 package com.ivanDuenias.ApiRest.servicio;
 
 import com.ivanDuenias.ApiRest.dto.ComentarioDTO;
+import com.ivanDuenias.ApiRest.dto.PublicacionDTO;
 import com.ivanDuenias.ApiRest.entidad.Comentario;
 import com.ivanDuenias.ApiRest.entidad.Publicacion;
 import com.ivanDuenias.ApiRest.excepcion.BlogAppException;
 import com.ivanDuenias.ApiRest.excepcion.ResourceNotFoundException;
 import com.ivanDuenias.ApiRest.repositorio.ComentarioRepositorio;
 import com.ivanDuenias.ApiRest.repositorio.PublicacionRepositorio;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -15,13 +17,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class ComentarioServicioImpl implements ComentarioServicio{
+public class ComentarioServicioImpl implements ComentarioServicio {
 
     @Autowired
     private ComentarioRepositorio comentarioRepositorio;
 
     @Autowired
     private PublicacionRepositorio publicacionRepositorio;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public ComentarioDTO crearComentario(long id, ComentarioDTO comentarioDTO) {
@@ -31,7 +36,7 @@ public class ComentarioServicioImpl implements ComentarioServicio{
         Comentario comentario = convertirAEntidad(comentarioDTO);
         //2. Buscar publicacion //Simil buscar cuenta
         Publicacion publicacion = publicacionRepositorio.findById(id)
-                .orElseThrow(() ->new ResourceNotFoundException());
+                .orElseThrow(() -> new ResourceNotFoundException());
 
         //3. Establecer comentario en la publicacion //Simil establecer transaccion en la cuenta
         comentario.setPublicacion(publicacion);
@@ -50,12 +55,12 @@ public class ComentarioServicioImpl implements ComentarioServicio{
     @Override
     public ComentarioDTO obtenerComentarioPorId(long id, long idComentario) {
         Publicacion publicacion = publicacionRepositorio.findById(id)
-                .orElseThrow(() ->new ResourceNotFoundException());
+                .orElseThrow(() -> new ResourceNotFoundException());
 
         Comentario comentario = comentarioRepositorio.findById(idComentario)
-                .orElseThrow(() ->new ResourceNotFoundException());
+                .orElseThrow(() -> new ResourceNotFoundException());
 
-        if(!comentario.getPublicacion().getId().equals(publicacion.getId())){
+        if (!comentario.getPublicacion().getId().equals(publicacion.getId())) {
             throw new BlogAppException(HttpStatus.BAD_REQUEST, "EL COMENTARIO NO PERTENECE A LA PUBLICACION");
         }
 
@@ -65,12 +70,12 @@ public class ComentarioServicioImpl implements ComentarioServicio{
     @Override
     public ComentarioDTO actualizarComentario(long id, long idComentario, ComentarioDTO solicitudComentario) {
         Publicacion publicacion = publicacionRepositorio.findById(id)
-                .orElseThrow(() ->new ResourceNotFoundException());
+                .orElseThrow(() -> new ResourceNotFoundException());
 
         Comentario comentario = comentarioRepositorio.findById(idComentario)
-                .orElseThrow(() ->new ResourceNotFoundException());
+                .orElseThrow(() -> new ResourceNotFoundException());
 
-        if(!comentario.getPublicacion().getId().equals(publicacion.getId())){
+        if (!comentario.getPublicacion().getId().equals(publicacion.getId())) {
             throw new BlogAppException(HttpStatus.BAD_REQUEST, "EL COMENTARIO NO PERTENECE A LA PUBLICACION");
         }
 
@@ -85,23 +90,23 @@ public class ComentarioServicioImpl implements ComentarioServicio{
     @Override
     public void eliminarComentario(long id, long idComentario) {
         Publicacion publicacion = publicacionRepositorio.findById(id)
-                .orElseThrow(() ->new ResourceNotFoundException());
+                .orElseThrow(() -> new ResourceNotFoundException());
 
         Comentario comentario = comentarioRepositorio.findById(idComentario)
-                .orElseThrow(() ->new ResourceNotFoundException());
+                .orElseThrow(() -> new ResourceNotFoundException());
 
-        if(!comentario.getPublicacion().getId().equals(publicacion.getId())){
+        if (!comentario.getPublicacion().getId().equals(publicacion.getId())) {
             throw new BlogAppException(HttpStatus.BAD_REQUEST, "El comentario no pertenece a la publicacion");
         }
 
         comentarioRepositorio.delete(comentario);
     }
 
-
-    private ComentarioDTO convertirADTO(Comentario comentario){
+    /*
+    private ComentarioDTO convertirADTO(Comentario comentario) {
         ComentarioDTO comentarioDTO = new ComentarioDTO();
 
-        comentarioDTO.setId(comentario.getIdComentario());
+        comentarioDTO.setId(comentario.getId());
         comentarioDTO.setNombre(comentario.getNombre());
         comentarioDTO.setEmail(comentario.getEmail());
         comentarioDTO.setCuerpo(comentario.getCuerpo());
@@ -109,14 +114,26 @@ public class ComentarioServicioImpl implements ComentarioServicio{
         return comentarioDTO;
     }
 
-    private Comentario convertirAEntidad(ComentarioDTO comentarioDTO){
+    private Comentario convertirAEntidad(ComentarioDTO comentarioDTO) {
         Comentario comentario = new Comentario();
 
-        comentario.setIdComentario(comentarioDTO.getId());
+        comentario.setId(comentarioDTO.getId());
         comentario.setNombre(comentarioDTO.getNombre());
         comentario.setEmail(comentarioDTO.getEmail());
         comentario.setCuerpo(comentarioDTO.getCuerpo());
 
         return comentario;
+    }*/
+
+    //Convertimos de DTO a entidad(Usando modelMapper)
+    public Comentario convertirAEntidad(ComentarioDTO comentarioDTO) {
+        Comentario comentario = modelMapper.map(comentarioDTO, Comentario.class);
+        return comentario;
+    }
+
+    //Convertimos de entidad a DTO
+    public ComentarioDTO convertirADTO(Comentario comentario) {
+        ComentarioDTO comentarioDTO = modelMapper.map(comentario, ComentarioDTO.class);
+        return comentarioDTO;
     }
 }

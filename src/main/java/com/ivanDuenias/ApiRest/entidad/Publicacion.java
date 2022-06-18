@@ -1,33 +1,78 @@
 package com.ivanDuenias.ApiRest.entidad;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import javax.persistence.*;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
-@Table(name = "publicaciones", uniqueConstraints = {@UniqueConstraint(columnNames = {"titulo"})})
+@Table(name = "publicaciones",uniqueConstraints = {@UniqueConstraint(columnNames = {"titulo"})})
 public class Publicacion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
+    @Column(name = "titulo",nullable = false)
     private String titulo;
-    @Column(nullable = false)
+    @Column(name = "descripcion", nullable = false)
     private String descripcion;
-    @Column(nullable = false)
+    @Column(name = "contenido", nullable = false)
     private String contenido;
 
     //cascadetype all y orphan removal es para que cuando elimine una publicacion se eliminen de esta sus comentarios , ola clase asociada
+    @JsonBackReference
     @OneToMany(mappedBy = "publicacion", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Comentario> comentarios = new HashSet<>();
 
+    public Publicacion() {
+    }
+
+    public Publicacion(Long id, String titulo, String descripcion, String contenido, Set<Comentario> comentarios) {
+        this.id = id;
+        this.titulo = titulo;
+        this.descripcion = descripcion;
+        this.contenido = contenido;
+        this.comentarios = comentarios;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitulo() {
+        return titulo;
+    }
+
+    public void setTitulo(String titulo) {
+        this.titulo = titulo;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    public String getContenido() {
+        return contenido;
+    }
+
+    public void setContenido(String contenido) {
+        this.contenido = contenido;
+    }
+
+    public Set<Comentario> getComentarios() {
+        return comentarios;
+    }
+
+    public void setComentarios(Set<Comentario> comentarios) {
+        this.comentarios = comentarios;
+    }
 }

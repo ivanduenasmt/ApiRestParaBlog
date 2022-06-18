@@ -5,6 +5,7 @@ import com.ivanDuenias.ApiRest.dto.PublicacionRespuesta;
 import com.ivanDuenias.ApiRest.entidad.Publicacion;
 import com.ivanDuenias.ApiRest.excepcion.ResourceNotFoundException;
 import com.ivanDuenias.ApiRest.repositorio.PublicacionRepositorio;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,13 +22,17 @@ public class PublicacionServicioImpl implements PublicacionServicio{
     @Autowired
     private PublicacionRepositorio publicacionRepositorio;
 
+    @Autowired
+    private ModelMapper modelMapper;
+
     @Override
     public PublicacionDTO crearPublicacion(PublicacionDTO publicacionDTO) {
         //Convertimos de DTO a entidad
         Publicacion publicacion = convertirAEntidad(publicacionDTO);
+        Publicacion nueva = publicacionRepositorio.save(publicacion);
 
         //Convertimos de entidad a DTO
-        PublicacionDTO publicacionDTO1 = convertirADTO(publicacion);
+        PublicacionDTO publicacionDTO1 = convertirADTO(nueva);
         return publicacionDTO1;
     }
 
@@ -80,25 +85,42 @@ public class PublicacionServicioImpl implements PublicacionServicio{
 
         publicacionRepositorio.delete(publicacion);
     }
-
-    //Convertimos de DTO a entidad
+/*
+    //Convertimos de DTO a entidad(Forma larga)
     public Publicacion convertirAEntidad(PublicacionDTO publicacionDTO){
         Publicacion publicacion = new Publicacion();
 
+        publicacion.setId(publicacionDTO.getId());
         publicacion.setTitulo(publicacionDTO.getTitulo());
         publicacion.setDescripcion(publicacionDTO.getDescripcion());
         publicacion.setContenido(publicacionDTO.getDescripcion());
+        publicacion.setComentarios(publicacionDTO.getComentarios());
         return publicacionRepositorio.save(publicacion);
     }
 
-    //Convertimos de entidad a DTO
+    //Convertimos de entidad a DTO(Forma larga)
     public PublicacionDTO convertirADTO(Publicacion publicacion){
         PublicacionDTO publicacionRespuesta = new PublicacionDTO();
 
+        publicacionRespuesta.setId(publicacion.getId());
         publicacionRespuesta.setTitulo(publicacion.getTitulo());
         publicacionRespuesta.setDescripcion(publicacion.getDescripcion());
         publicacionRespuesta.setContenido(publicacion.getContenido());
+        publicacionRespuesta.setComentarios(publicacion.getComentarios());
         return publicacionRespuesta;
     }
-    
+    */
+
+    //Convertimos de DTO a entidad(Usando modelMapper)
+    public Publicacion convertirAEntidad(PublicacionDTO publicacionDTO){
+        Publicacion publicacion = modelMapper.map(publicacionDTO,Publicacion.class);
+        return publicacion;
+    }
+    //Convertimos de entidad a DTO
+    public PublicacionDTO convertirADTO(Publicacion publicacion){
+        PublicacionDTO publicacionDTO = modelMapper.map(publicacion, PublicacionDTO.class);
+        return publicacionDTO;
+    }
+
+
 }

@@ -15,4 +15,5 @@ public class PublicacionRespuesta {
     private long totalElementos;
     private int totalPaginas;
     private boolean ultima;
+
 }
