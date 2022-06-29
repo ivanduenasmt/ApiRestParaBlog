@@ -1,11 +1,23 @@
 package com.ivanDuenias.ApiRest.dto;
 
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
+
 public class ComentarioDTO {
 
     private long id;
+
+    @NotEmpty(message = "El nombre no debe estar vacio")
     private String nombre;
+
+    @Email
+    @NotEmpty(message = "El email no debe ser vacio")
     private String email;
+
+    @NotEmpty
+    @Size(min = 10, message = "El cuerpo del comentario debe tener al menos 10 caracteres")
     private String cuerpo;
 
     public ComentarioDTO() {
